@@ -170,8 +170,8 @@ const logoutUser = asynchandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -433,34 +433,38 @@ const getWatchHistory = asynchandler(async (req, res) => {
               localField: "owner",
               foreignField: "_id",
               as: "owner",
-              pipeline:[
+              pipeline: [
                 {
-                  $project:{
-                    fullname:1,
-                    username:1,
-                    avatar:1,
-                  }
-                }
-              ]
+                  $project: {
+                    fullname: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
             },
           },
           {
-            $addFields:{
-              owner:{
-                $first: "$owner"
-              }
-            }
-          }
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
         ],
       },
     },
   ]);
 
   return res
-  .status(200)
-  .json(
-    new ApiResponse(200, user[0].watchHistory, "Watch history fetched successfully")
-  )
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch history fetched successfully"
+      )
+    );
 });
 
 export {
@@ -474,5 +478,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
-  getWatchHistory
+  getWatchHistory,
 };
